@@ -1,0 +1,218 @@
+<% include ../partials/header %>
+<div class="row">
+  <div class="col-md-3">
+    <p class="lead">Stonks</p>
+    <!-- <div class="list-group">
+      <li class="list-group-item active">info 1</li>
+      <li class="list-group-item">info 2</li>
+      <li class="list-group-item">info 3</li>
+    </div> -->
+    <div id="map"></div>
+  </div>
+  <div class="col-md-9">
+    <div class="thumbnail">
+      <img class="img-responsive" src="<%= product.image.url %>">
+      <div class="caption">
+        <h4 class="pull-right">$<%= product.price %>/piece</h4>
+		<p>
+			
+		  </p>
+		 <p>
+			 
+		  </p>
+		<% if (product.comments.length === 0) { %>
+			<h4 class="pull-right">
+				<h4 class="pull-down">
+				<em style="color: grey;">No ratings yet. Rate this product!</em>
+				</h4>
+			</h4>
+		<% } else{ %>
+			<h4 class="pull-right">
+				<h4 class="pull-down">
+					Average Rating: <%= (product.rating/product.comments.length)%>
+				</h4>
+			</h4>
+		  <!-- <p><img src="/stars/<%= Math.floor(product.rating / product.comments.length)*10%>.jpg" height="25" width="125"></p> -->
+		<% } %>	
+        <h4><a><%= product.name %></a></h4>
+        <p><%= product.description %></p>
+		<p>
+			<en>Location: <%= product.location%></en>	
+		</p>
+        <p>
+          <em>Submitted By <a href="/users/<%= product.author.id %>"><%= product.author.username %></a>, <%= moment(product.createdAt).fromNow() %></em>
+        </p>
+		<% if (currentUser) {%>
+		  <%= console.log(currentUser)%>
+          <form action="/users/<%= currentUser._id %>/shopping/<%= product._id%>" method="POST">
+			<button type="button" class="btn btn-primary">Add to Shopping List</button>
+          </form>
+		  <!-- <form>
+			   <button type="submit" class="btn btn-primary" onclick="addProduct('<%= currentUser%>');">Add to Shopping List</button>
+				<script type="text/javascript">
+				  function addProduct(currentUser) {
+					console.log("Yep");
+					  console.log(currentUser);
+					// const   User       = require("../models/user"),
+					// 		Product    = require("../models/product")
+					// Product.findByIdAndUpdate(product._id, (err, foundProduct) => {
+					// 	 User.shoppingList.push(foundProduct);
+					// 	  User.save();
+					// 	  res.redirect("/products/");
+					// 	 // res.render("/users/"+User._id+"/shopping", {products: User.shoppingList});
+					//   });
+					currentUser.shoppingList.push(product);
+					currentUser.save();
+				  }
+				</script>
+		  </form> -->
+
+
+		<% } %>
+        <% if (currentUser && product.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin) {%>
+          <a class="btn btn-warning btn-sm" href="/products/<%= product._id %>/edit">Edit</a>
+          <form class="delete-form" action="/products/<%= product._id %>?_method=DELETE" method="POST">
+            <button class="btn btn-danger btn-sm">Delete</button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+    <div class="well">
+      <div class="text-right">
+        <a class="btn btn-success btn-sm pull-right" role="button" data-toggle="collapse" href="#collapseComment" aria-expanded="false" aria-controls="collapseComment">
+          <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add new comment
+        </a>
+      </div>
+      <!--Comment section title-->
+      <h4><span class="glyphicon glyphicon glyphicon-comment" aria-hidden="true"></span> <strong>Comments</strong></h4>
+      <!--Collapse Add a comment form START-->
+      <div class="collapse" id="collapseComment">
+        <div class="well" style="border-left: 3px solid #00A546;">
+          <% if (!currentUser) { %>
+            <h5>You need to be logged in first. Click <a href="/login">here</a> to go to the login page.</h5>
+          <% } %>
+          <% if (currentUser) { %>
+            <h4>Say something about this product <span class="glyphicon glyphicon glyphicon-pencil" aria-hidden="true"></span></h4>
+            <form id="add-comment-form" action="/products/<%= product._id %>/comments" method="POST">
+              <div class="form-group">
+                <input class="form-control" type="text" disabled value="<%= currentUser.username %>">
+              </div>
+              <div class="form-group">
+                <textarea class="form-control" name="comment[text]" placeholder="What are you thinking about?" form="add-comment-form" rows="5" cols="70" autocomplete="off"></textarea>
+              </div>
+				
+				<!-- Rating -->
+				<div class="form-group">
+					<label for="rating">Rating:</label>
+					<input type="number" name="rating" id="rating" min="0" max="10">
+				</div>
+				
+              <div class="form-group">
+                <button class="btn btn-success btn-sm">Send</button>
+              </div>
+            </form>
+          <% } %>
+        </div>
+      </div>
+      <!--Collapse Add a comment form END-->
+      <hr>
+      <!--Check if there are comments-->
+      <% if (product.comments.length === 0) { %>
+        <em style="color: grey;">No comments yet. Say something about this product!</em>
+      <% } %>
+      <% product.comments.forEach(comment => { %>
+        <div class="row">
+          <div class="col-md-12">
+            <strong>
+                <a href="/users/<%= comment.author.id %>"><%= comment.author.username %></a>
+            </strong>
+            <span class="pull-right"><%= moment(comment.createdAt).fromNow() %></span>
+            <p>
+              <%= comment.text %>
+            </p>
+			<!-- Rating -->
+			<div class="form-group">
+				<label for="rating">Rating:</label>
+				<img class="stars" src="/stars/<%= comment.rating*10%>.jpg" height="25" width="125">
+			</div>
+            <% if (currentUser && comment.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin) {%>
+              <a
+                class="btn btn-warning btn-xs"
+                role="button"
+                data-toggle="collapse"
+                href="#collapseEdit<%= comment._id %>"
+                aria-expanded="false"
+                aria-controls="collapse<%= comment._id %>"
+              >Edit</a>
+              <form
+                id="delete-form"
+                action="/products/<%= product._id %>/comments/<%= comment._id %>?_method=DELETE"
+                method="POST"
+                style="display: inline;"
+              >
+                <button class="btn btn-danger btn-xs">Delete</button>
+              </form>
+              <!--Edit comment form-->
+              <!--make each id attribute unique by adding comment._id-->
+              <div class="collapse" id="collapseEdit<%= comment._id %>">
+                <div class="well" style="border-left: 3px solid #ffbb33; margin-top: 15px;">
+                  <h4>Edit your comment <span class="glyphicon glyphicon-edit" aria-hidden="true"></span></h4>
+                  <form id="edit-comment-form" action="/products/<%= product._id %>/comments/<%= comment._id %>?_method=PUT" method="POST">
+                    <div class="form-group">
+                      <input class="form-control" type="text" disabled value="<%= currentUser.username %>">
+                    </div>
+                    <div class="form-group">
+                      <textarea class="form-control" name="comment[text]" placeholder="What are you think about?" form="edit-comment-form" rows="5" cols="70" autocomplete="off"><%= comment.text %></textarea>
+                    </div>
+					  
+					<!-- Rating -->
+					<div class="form-group">
+						<label for="rating">Rating:</label>
+						<input type="number" name="rating" id="rating" min="0" max="10" placeholder= "<%= comment.rating %>" >
+					</div>
+					  
+                    <div class="form-group">
+                      <button class="btn btn-warning btn-xs">Save</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            <% } %>
+            <hr>
+          </div>
+        </div>
+      <% }); %>
+		
+    </div>
+  </div>
+</div>
+
+<!-- <script>
+  function initMap() {
+    let lat = <%= product.lat %>;
+        lng = <%= product.lng %>,
+        center = { lat, lng };
+    let map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 8,
+        center: center,
+        scrollwheel: false
+    });
+    let contentString = `
+      <h4><%= product.name %></h4>
+      <p><em><%= product.location %></em></p>
+      <p><%= product.description %></p>
+    `
+    let infowindow = new google.maps.InfoWindow({
+      content: contentString
+    });
+    let marker = new google.maps.Marker({
+        position: center,
+        map: map
+    });
+    marker.addListener('click', function() {
+      infowindow.open(map, marker);
+    });
+  }
+</script> -->
+<!-- <script src="https://maps.googleapis.com/maps/api/js?key=APIKEY&callback=initMap" async defer></script> -->
+<% include ../partials/footer %>
