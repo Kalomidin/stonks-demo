@@ -2,6 +2,12 @@
 * Backend of our system is built by using __Node JS, Express JS framework, Mongo DB__
 * Frontend of our system is built by using __HTML, CSS, jQuery, Bootstrap__
 
+We tried to modularize our code as much as possible to make changes easily and handle and debug faster.  
+The middleware/index.js file checks the references related to ownerships and whether user is logged in or not.  
+Models folder is our Database structure and it is consisted of user, comments and products.  
+Routes folder handles the functionality of our website.  
+Public folder handles with the style of the demo and files in the View folder are the .ejs files which are the code templates.  
+
 ## Stack of our Stonks app
 * Node JS
 * Mongo DB
